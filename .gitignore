@@ -1,0 +1,13 @@
+node_modules
+/build
+/.svelte-kit
+/dist
+.DS_Store
+.env
+.env.*
+!.env.example
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# Windows zone identifier files
+*:Zone.Identifier

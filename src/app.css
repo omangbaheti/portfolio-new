@@ -1,0 +1,202 @@
+/* ============================================================
+   RETRO JAPANESE ARCADE / FIGHTSTICK POSTER — SYSTEM STYLESHEET
+   Design per DESIGN.MD
+   Beige #D9D5C9 (Model M) · Charcoal #1C1B19 · Burnt orange #D96E3A
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap');
+
+:root {
+	/* Palette — 3-4 colors max */
+	--beige: #d9d5c9; /* IBM Model M pearl-grey page background */
+	--char: #1c1b19; /* near-black charcoal */
+	--char-2: #24221f; /* raised dark panel */
+	--orange: #d96e3a; /* burnt orange accent */
+	--cream: #d9d5c9; /* IBM Model M pearl-grey text on dark panels */
+
+	/* Typography */
+	--font-display: 'Anton', 'Arial Narrow', sans-serif; /* bold condensed, all caps */
+	--font-subs: 'Inter', sans-serif; /* thin subheadings, wide tracking */
+	--font-mono: 'Space Mono', monospace; /* body / label */
+
+	--flat-shadow: 6px 6px 0 rgba(28, 27, 25, 0.18);
+	--hairline: rgba(28, 27, 25, 0.18);
+}
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+html {
+	scroll-behavior: smooth;
+	color-scheme: light;
+}
+
+body {
+	background-color: var(--beige);
+	color: var(--char);
+	font-family: var(--font-subs);
+	font-size: 15px;
+	line-height: 1.6;
+	-webkit-font-smoothing: antialiased;
+}
+
+/* Sticky footer: fill full height so footer sits at the bottom of short pages */
+html,
+body {
+	height: 100%;
+}
+#app {
+	min-height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+#app main {
+	flex: 1 0 auto;
+}
+
+::selection {
+	background: var(--orange);
+	color: var(--cream);
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+img {
+	display: block;
+	max-width: 100%;
+}
+
+/* ---------- Typography helpers ---------- */
+
+/* Bold condensed headline, all caps, tight tracking */
+.display {
+	font-family: var(--font-display);
+	font-weight: 400;
+	text-transform: uppercase;
+	letter-spacing: 0.01em;
+	line-height: 0.9;
+}
+
+/* Thin subheading, wide tracking, small, all caps */
+.eyebrow {
+	font-family: var(--font-subs);
+	font-weight: 300;
+	letter-spacing: 0.28em;
+	text-transform: uppercase;
+	font-size: 12px;
+}
+
+/* Mono label / body on dark */
+.mono-label {
+	font-family: var(--font-mono);
+	font-size: 11px;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+
+/* ---------- Panels & effects ---------- */
+
+.panel {
+	background: var(--char);
+	color: var(--cream);
+	border-radius: 16px;
+}
+
+.panel-dk {
+	background: var(--char-2);
+	color: var(--cream);
+	border-radius: 14px;
+}
+
+/* Halftone/grain overlay for print aesthetic on dark panels */
+.halftone {
+	background-image: radial-gradient(rgba(239, 227, 208, 0.16) 1px, transparent 1px);
+	background-size: 9px 9px;
+}
+
+.grain {
+	position: relative;
+}
+.grain::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	opacity: 0.5;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+	mix-blend-mode: overlay;
+}
+
+/* Flat drop shadow (only shadows allowed) */
+.flat-shadow {
+	box-shadow: var(--flat-shadow);
+}
+
+/* Halftone dot burst near edges */
+.dotburst {
+	background-image: radial-gradient(rgba(28, 27, 25, 0.5) 1.1px, transparent 1.3px);
+	background-size: 6px 6px;
+}
+
+/* Hard-edged box */
+.box {
+	border: 1px solid var(--char);
+}
+
+/* Starburst / price callout */
+.starburst {
+	background: var(--orange);
+	color: var(--cream);
+	font-family: var(--font-display);
+	text-transform: uppercase;
+	clip-path: polygon(50% 0, 61% 12%, 75% 5%, 78% 20%, 93% 21%, 88% 35%, 100% 44%, 89% 55%, 93% 70%, 78% 72%, 77% 87%, 63% 83%, 52% 96%, 42% 84%, 28% 89%, 25% 74%, 10% 70%, 18% 57%, 5% 46%, 18% 35%, 12% 20%, 28% 20%, 25% 5%, 41% 12%);
+}
+
+/* Comic impact lines accent */
+.impact {
+	stroke: var(--orange);
+	fill: none;
+}
+
+/* ---------- Content width ---------- */
+.container {
+	width: 100%;
+	max-width: 1100px;
+	margin: 0 auto;
+	padding: 0 0;
+}
+
+/* ---------- Rounded corners everywhere ---------- */
+.hero,
+.card,
+.voice,
+.step,
+.stat,
+.spec,
+.social,
+.form,
+.filters,
+.filter-btn,
+.stamp,
+.topbar,
+.portrait,
+.interlude,
+.btn-work,
+.btn-contact,
+.btn-cta,
+.btn-ghost,
+.submit,
+.chip,
+input,
+textarea,
+.photo,
+.art-frame,
+.vr-photo {
+	border-radius: 14px;
+}
