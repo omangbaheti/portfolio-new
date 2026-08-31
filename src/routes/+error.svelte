@@ -10,8 +10,10 @@
 		<p class="mono-label msg">
 			{page.status === 404 ? 'No sector here. Insert another coin.' : page.error?.message}
 		</p>
-		<a class="btn mono-label" href="/">← BACK TO START</a>
+		<a class="btn mono-label anim-wub press" href="/">← CONTINUE →</a>
 	</div>
+
+	<span class="mono-label hint">INSERT COIN TO PLAY AGAIN</span>
 </section>
 
 <style>
@@ -39,6 +41,22 @@
 	.big {
 		color: var(--orange);
 		font-size: 64px;
+		display: inline-block;
+		animation: teeter 2.4s ease-in-out infinite;
+	}
+	@keyframes teeter {
+		0%,
+		100% {
+			transform: rotate(-2deg);
+		}
+		50% {
+			transform: rotate(2deg);
+		}
+	}
+	.hint {
+		color: var(--char);
+		opacity: 0.5;
+		letter-spacing: 0.18em;
 	}
 	.title {
 		color: var(--cream);

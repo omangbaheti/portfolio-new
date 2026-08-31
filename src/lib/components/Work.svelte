@@ -1,25 +1,32 @@
 <script lang="ts">
 	import { projects, type Discipline } from '$lib/data/projects.js';
 	import ProjectTile from './ProjectTile.svelte';
+	import { reveal } from '$lib/reveal';
 
-	let filter = $state<'all' | Discipline>('all');
+	type Filter = 'all' | Discipline;
+	const filters: { k: Filter; l: string }[] = [
+		{ k: 'all', l: 'F1 ALL' },
+		{ k: 'xr', l: 'F2 DEV' },
+		{ k: 'ux', l: 'F3 RESEARCH' }
+	];
+
+	let filter = $state<Filter>('all');
 	const visible = $derived(
 		filter === 'all' ? projects : projects.filter((p) => p.discipline === filter)
 	);
 </script>
 
 <section id="work" class="work">
-	<div class="section-head container">
+	<div class="section-head container" use:reveal>
 		<div>
-			<span class="eyebrow">SELECTED WORKS</span>
-			<h2 class="display sect-title">Arcade<br />Cabinet</h2>
+			<h2 class="display sect-title">Featured<br />Works</h2>
 		</div>
 
 		<!-- Filter — fightstick function keys -->
 		<div class="filters">
-			{#each [{ k: 'all', l: 'F1 ALL' }, { k: 'xr', l: 'F2 DEV' }, { k: 'ux', l: 'F3 RESEARCH' }] as f (f.k)}
+			{#each filters as f (f.k)}
 				<button
-					class="filter-btn display"
+					class="filter-btn display anim-wub press"
 					class:active={filter === f.k}
 					onclick={() => (filter = f.k)}
 				>
@@ -30,8 +37,8 @@
 	</div>
 
 	<div class="grid container">
-		{#each visible as project (project.slug)}
-			<ProjectTile {project} />
+		{#each visible as project, i (project.slug)}
+			<ProjectTile {project} revealDelay={Math.min(i, 5) * 70} />
 		{/each}
 	</div>
 </section>

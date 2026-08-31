@@ -10,7 +10,6 @@
 
 <article class="proj-page">
 	<header class="proj-head container">
-		<a class="back mono-label" href="/projects">← ALL WORK</a>
 		<span class="mono-label meta">
 			CASE / {project.id} · {project.year}
 		</span>
@@ -73,16 +72,9 @@
 		align-items: center;
 		text-align: center;
 	}
-	.back,
 	.meta {
 		color: var(--orange);
 		display: block;
-	}
-	.back {
-		margin-bottom: 18px;
-	}
-	.back:hover {
-		color: var(--char);
 	}
 	.title {
 		font-size: clamp(2rem, 6vw, 3.6rem);
@@ -105,6 +97,7 @@
 		border: 1px solid var(--orange);
 		padding: 4px 10px;
 		font-size: 9px;
+		border-radius: 6px;
 	}
 
 	.art {
@@ -132,7 +125,7 @@
 	}
 
 	.body {
-		max-width: 720px;
+		max-width: 860px;
 		margin: 0 auto;
 		margin-top: 32px;
 		padding: 0 24px;

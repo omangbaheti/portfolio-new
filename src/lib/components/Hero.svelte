@@ -1,11 +1,122 @@
 <script lang="ts">
 	let { name = 'OMANG BAHETI' } = $props();
+	import { backOut, backIn } from 'svelte/easing';
+	import { onDestroy } from 'svelte';
+
 	import vrImage from '../../assets/VRHeadset.png?url';
+	import controllerImg from '../../assets/controller.png?url';
+	import gridImg from '../../assets/grid.png?url';
+	import neuralImg from '../../assets/neural-network.png?url';
+	import notebookImg from '../../assets/notebook.png?url';
+	import robotImg from '../../assets/robot.png?url';
+	import SocialIcon from '$lib/components/SocialIcon.svelte';
+
+	// Split the name into letters for the hover-raise wave
+	const titleWords = $derived(name.split(' ').map((w) => w.split('')));
+
+	/* ------------------------------------------------------------------
+	   Hover fan-out: each asset starts stacked at the headset centre
+	   (opacity 0, scale 0.6) and tweens out to its clock position.
+	   Positions are % of the stage so the orbit stays proportional on
+	   every viewport.  z: 1 = grid (behind headset), 3 = in front.
+	------------------------------------------------------------------ */
+	type Pose = { x: number; y: number; rot: number; s: number; o: number };
+
+	const CENTER: Pose = { x: 50, y: 50, rot: 0, s: 0.6, o: 0 };
+
+	const lerpPose = (a: Pose, b: Pose, t: number): Pose => ({
+		x: a.x + (b.x - a.x) * t,
+		y: a.y + (b.y - a.y) * t,
+		rot: a.rot + (b.rot - a.rot) * t,
+		s: a.s + (b.s - a.s) * t,
+		o: a.o + (b.o - a.o) * t
+	});
+
+	// Final fan-out poses (x/y = % of stage centre, rot = settle degrees).
+	// Order here sets the stagger: robot(12) → grid(2) → controller(6) →
+	// grid(7) → neural(9) → notebook(5).
+	// tdur/tdelay tune the tilt-stop-motion per asset so robot & controller
+	// rock out of sync (different duration + phase offset).
+	const fans = [
+		{ key: 'robot',      src: robotImg,      z: 3, w: 29,   anim: 'tilt', tdur: 1.3,  tdelay: 0,     to: { x: 28, y: 8,   rot: 0, s: 1, o: 1 } },
+		{ key: 'grid-2',     src: gridImg,       z: 1, w: 38, to: { x: 68, y: 33, rot: 4,  s: 1, o: 1 } },
+		{ key: 'controller', src: controllerImg, z: 3, w: 31, anim: 'tilt', tdur: 1.7,  tdelay: -0.4, to: { x: 50, y: 106, rot: 0, s: 1, o: 1 } },
+		{ key: 'grid-7',     src: gridImg,       z: 1, w: 38, to: { x: 20, y: 91, rot: -4, s: 1, o: 1 } },
+		{ key: 'neural',     src: neuralImg,     z: 3, w: 24, anim: 'bob',  to: { x: 16, y: 90, rot: 0, s: 1, o: 1 } },
+		{ key: 'notebook',   src: notebookImg,   z: 3, w: 38, anim: 'bob',  to: { x: 86, y: 94, rot: 0, s: 1, o: 1 } }
+	];
+
+	// Reactive poses keyed by asset key (top-level $state = clean runes).
+	let poses = $state<Record<string, Pose>>({});
+	for (const f of fans) poses[f.key] = { ...CENTER };
+
+	// In-flight tween queue driven by a single requestAnimationFrame loop.
+	type Tween = {
+		key: string;
+		from: Pose;
+		to: Pose;
+		start: number;
+		delay: number;
+		duration: number;
+		easing: (t: number) => number;
+	};
+	let active: Tween[] = [];
+	let raf = 0;
+
+	function tick(now: number) {
+		const next: Tween[] = [];
+		for (const p of active) {
+			const elapsed = now - p.start - p.delay;
+			if (elapsed < 0) {
+				next.push(p); // still in stagger delay — hold current pose
+				continue;
+			}
+			const t = Math.min(elapsed / p.duration, 1);
+			poses[p.key] = lerpPose(p.from, p.to, p.easing(t));
+			if (t < 1) next.push(p);
+		}
+		active = next;
+		raf = next.length ? requestAnimationFrame(tick) : 0;
+	}
+
+	function animate(hover: boolean) {
+		// Cancel any in-flight tweens; each asset resumes from its current pose.
+		active = [];
+		const now = performance.now();
+		fans.forEach((f, i) => {
+			const to = hover ? f.to : CENTER;
+			const delay = hover ? i * 40 : (fans.length - 1 - i) * 30;
+			const duration = hover ? 700 : 490; // exit ~70% of entrance
+			active.push({
+				key: f.key,
+				from: { ...poses[f.key] },
+				to,
+				start: now,
+				delay,
+				duration,
+				easing: hover ? backOut : backIn
+			});
+		});
+		if (!raf) raf = requestAnimationFrame(tick);
+	}
+
+	onDestroy(() => {
+		if (raf) cancelAnimationFrame(raf);
+	});
 </script>
 
 <!-- Title block: name at top center in black, subtitle in leverless style -->
 <div class="title-block">
-	<h1 class="display page-title">{name}</h1>
+	<h1 class="display page-title" aria-label={name}>
+		<span aria-hidden="true">
+			{#each titleWords as word, wi (wi)}
+				{#if wi > 0}{' '}{/if}
+				{#each word as ch, ci (`${wi}-${ci}`)}
+					<span class="ltr" style="--d:{ci * 24}ms">{ch}</span>
+				{/each}
+			{/each}
+		</span>
+	</h1>
 	<span class="eyebrow page-sub">Software/XR Developer | UX Researcher | Game Designer</span>
 </div>
 
@@ -16,9 +127,39 @@
 	<div class="dotburst burst-br" aria-hidden="true"></div>
 
 	<div class="hero-grid">
-		<!-- VR headset product image -->
-		<div class="hero-art">
-			<img class="vr-photo" src={vrImage} alt="VR headset illustration" />
+		<!-- VR headset + orbiting assets -->
+		<div
+			class="hero-art"
+			role="img"
+			aria-label="VR headset with orbiting project icons"
+			onmouseenter={() => animate(true)}
+			onmouseleave={() => animate(false)}
+		>
+			<div class="stage">
+					{#each fans as f (f.key)}
+						<div
+							class="orbit"
+							class:grid={f.key.startsWith('grid')}
+							aria-hidden="true"
+							style:width="{f.w}%"
+							style:z-index={f.z}
+							style:left="{poses[f.key].x}%"
+							style:top="{poses[f.key].y}%"
+							style:opacity={poses[f.key].o}
+							style:transform="translate(-50%, -50%) rotate({poses[f.key].rot}deg) scale({poses[f.key].s})"
+						>
+							<img
+								class="orbit-img {f.anim === 'tilt' ? 'tilt' : ''} {f.anim === 'bob' ? 'bob-up' : ''}"
+								src={f.src}
+								alt=""
+								style:animation-duration={f.tdur ? f.tdur + 's' : ''}
+								style:animation-delay={f.tdelay !== undefined ? f.tdelay + 's' : ''}
+							/>
+						</div>
+					{/each}
+
+				<img class="vr-photo bob" src={vrImage} alt="VR headset illustration" />
+			</div>
 		</div>
 
 		<!-- Description + actions -->
@@ -29,39 +170,35 @@
 			</p>
 
 			<div class="hero-actions">
-				<a href="/projects" class="btn-work display">View Work</a>
-				<a href="/contact" class="btn-contact display">Contact Me</a>
+				<a href="#work" class="btn-work display press">View Work</a>
+				<a href="#contact" class="btn-contact display press">Contact Me</a>
 
 				<div class="social-inline">
-					<a class="social-icon" href="mailto:omang@baheti.dev" title="Email">
-						<svg viewBox="0 0 80 80" class="mini">
-							<g transform="translate(14 14) scale(2.1667)">
-								<path class="so" d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" />
-								<rect class="so" x="2" y="4" width="20" height="16" rx="2" />
-							</g>
-						</svg>
-					</a>
-					<a class="social-icon" href="https://scholar.google.com" title="Scholar" target="_blank" rel="noreferrer">
-						<svg viewBox="0 0 80 80" class="mini">
-							<g class="sb" transform="translate(14 14) scale(2.1667)">
-								<path d="M10.93 2.045c-.547.366-3.22 2.14-5.938 3.945C2.272 7.794.05 9.286.05 9.304c0 .019.136.11.305.2.167.096 2.85 1.583 5.965 3.31l5.656 3.143.144-.074c.082-.04 2.169-1.232 4.642-2.642l4.493-2.568.027 7.947h2.668V9.319l-3.46-2.32c-4.664-3.124-8.392-5.586-8.484-5.606-.045-.008-.527.287-1.076.652M5.355 16.633l.014 2.005 3.31 1.987 3.31 1.982 3.337-2 3.332-2.005V16.62c0-1.092-.013-1.983-.027-1.983s-1.318.782-2.9 1.741l-3.306 1.996-.431.256-1.32-.791a604.12 604.12 0 0 1-3.286-1.979l-2.005-1.21c-.024-.008-.032.883-.027 1.983" />
-							</g>
-						</svg>
-					</a>
-					<a class="social-icon" href="https://www.linkedin.com" title="LinkedIn" target="_blank" rel="noreferrer">
-						<svg viewBox="0 0 80 80" class="mini">
-							<g class="sb" transform="translate(14 14) scale(2.1667)">
-								<path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-							</g>
-						</svg>
-					</a>
-					<a class="social-icon" href="https://github.com" title="GitHub" target="_blank" rel="noreferrer">
-						<svg viewBox="0 0 80 80" class="mini">
-							<g class="sb" transform="translate(14 14) scale(2.1667)">
-								<path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
-							</g>
-						</svg>
-					</a>
+					<SocialIcon name="email" href="mailto:omang@baheti.dev" label="Email" size={32} lift />
+					<SocialIcon
+						name="scholar"
+						href="https://scholar.google.com"
+						label="Scholar"
+						size={32}
+						lift
+						external
+					/>
+					<SocialIcon
+						name="linkedin"
+						href="https://www.linkedin.com"
+						label="LinkedIn"
+						size={32}
+						lift
+						external
+					/>
+					<SocialIcon
+						name="github"
+						href="https://github.com"
+						label="GitHub"
+						size={32}
+						lift
+						external
+					/>
 				</div>
 			</div>
 		</div>
@@ -79,6 +216,25 @@
 		font-size: clamp(2.6rem, 9vw, 6rem);
 		line-height: 0.9;
 	}
+	/* Per-letter hover raise — bigger, slower wave than the header brand,
+	   scaled for display type */
+	.ltr {
+		display: inline-block;
+		transition:
+			transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+			color 0.15s ease;
+		transition-delay: var(--d, 0ms);
+	}
+	.page-title:hover .ltr {
+		transform: translateY(-0.09em);
+		color: var(--orange);
+		transition-delay: calc(var(--d, 0ms) / 2);
+	}
+	.page-title .ltr:hover {
+		transform: translateY(-0.14em) rotate(-3deg);
+		color: var(--orange);
+		transition-delay: 0ms;
+	}
 	.page-sub {
 		color: var(--orange);
 		display: block;
@@ -86,21 +242,11 @@
 		font-weight: 700;
 	}
 
-	/* ---- icon row (combined social box) ---- */
-	.g {
-		fill: none;
-		stroke: var(--cream);
-		stroke-width: 3;
-	}
-	.accent {
-		stroke: var(--orange);
-	}
-
 	/* ---- hero ---- */
 	.hero {
-		max-width: 860px;
+		max-width: 960px;
 		margin: 28px auto 0;
-		padding: 24px 20px;
+		padding: 28px 24px;
 		border: 2px solid var(--char);
 		box-shadow: var(--flat-shadow);
 		position: relative;
@@ -108,15 +254,115 @@
 	}
 	@media (min-width: 768px) {
 		.hero {
-			padding: 28px 30px;
+			padding: 44px 48px;
 		}
 	}
 
+	/* ---- headset stage + fan-out ---- */
+	.hero-art {
+		position: relative;
+		overflow: visible;
+		padding: 60px 48px 76px;
+	}
+	.stage {
+		position: relative;
+	}
+
+	/* Headset is the in-flow base of the stage; z-index 2 puts it between
+	   the grid (1) and the front assets (3). */
 	.vr-photo {
 		width: 100%;
 		height: auto;
 		object-fit: contain;
 		display: block;
+		position: relative;
+		z-index: 2;
+	}
+
+	/* Stop-motion bob: discrete translateY steps, no easing between frames.
+	   Plays only while the headset is being hovered. */
+	@keyframes bob {
+		0% {
+			transform: translateY(0);
+		}
+		20% {
+			transform: translateY(-8px);
+	}
+		40% {
+			transform: translateY(-3px);
+		}
+		60% {
+			transform: translateY(-10px);
+		}
+		80% {
+			transform: translateY(-2px);
+		}
+		100% {
+			transform: translateY(0);
+		}
+	}
+	.bob {
+		animation: none;
+	}
+	.hero-art:hover .bob {
+		animation: bob 1s steps(1, end) infinite;
+	}
+
+	/* Orbiting assets — absolutely centred on the stage, moved by tweens.
+	   The wrapper carries the tweened pose; the inner img carries the idle
+	   stop-motion (tilt/bob) so the two transforms compose instead of clash. */
+	.orbit {
+		position: absolute;
+		display: block;
+		will-change: transform, opacity, left, top;
+	}
+	.orbit-img {
+		display: block;
+		width: 100%;
+		height: auto;
+	}
+
+	/* Stop-motion satellites: discrete keyframes, no easing between frames */
+	@keyframes satTilt {
+		0% {
+			transform: rotate(-6deg);
+		}
+		30% {
+			transform: rotate(6deg);
+		}
+		55% {
+			transform: rotate(-3deg);
+		}
+		80% {
+			transform: rotate(5deg);
+		}
+		100% {
+			transform: rotate(-6deg);
+		}
+	}
+	@keyframes satBob {
+		0% {
+			transform: translateY(0);
+		}
+		25% {
+			transform: translateY(-9px);
+		}
+		50% {
+			transform: translateY(-3px);
+		}
+		75% {
+			transform: translateY(-7px);
+		}
+		100% {
+			transform: translateY(0);
+		}
+	}
+	/* Idle animations only play while the fan-out is shown (hover) */
+	.hero-art:hover .orbit-img.tilt {
+		animation: satTilt 1.3s steps(1, end) infinite;
+	}
+	.hero-art:hover .orbit-img.bob-up {
+		animation: satBob 1.2s steps(1, end) infinite;
 	}
 
 	.hero-grid {
@@ -166,7 +412,7 @@
 		background: var(--cream);
 		border-color: var(--cream);
 		color: var(--char);
-		transform: scale(1.06);
+		transform: rotate(-1.5deg) scale(1.08);
 	}
 	.btn-contact {
 		display: inline-block;
@@ -178,45 +424,29 @@
 		border: 2px solid var(--orange);
 		box-shadow: var(--flat-shadow);
 		transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.15s;
+		/* Subtle idle "breathing" — animates the individual `scale` property so
+		   it composes with the hover/press transforms instead of fighting them. */
+		animation: breathe 2.8s ease-in-out infinite;
 	}
 	.btn-contact:hover {
 		background: var(--char);
 		border-color: var(--orange);
-		transform: scale(1.06);
+		transform: rotate(1.5deg) scale(1.08);
+	}
+	@keyframes breathe {
+		0%,
+		100% {
+			scale: 1;
+		}
+		50% {
+			scale: 1.085;
+		}
 	}
 
 	.social-inline {
 		display: flex;
 		align-items: center;
-		gap: 12px;
-	}
-	.social-icon {
-		display: inline-block;
-		width: 40px;
-		height: 40px;
-		color: var(--cream);
-		transition: transform 0.15s, color 0.15s;
-	}
-	.social-icon:hover {
-		color: var(--orange);
-		transform: scale(1.1);
-	}
-	.social-icon .mini {
-		width: 40px;
-		height: 40px;
-		display: block;
-	}
-	/* brand glyphs: filled path (simple-icons) */
-	.sb {
-		fill: currentColor;
-	}
-	/* email glyph: stroked path (lucide mail) */
-	.so {
-		fill: none;
-		stroke: currentColor;
-		stroke-width: 2;
-		stroke-linecap: round;
-		stroke-linejoin: round;
+		gap: 16px;
 	}
 
 	.burst-tl {

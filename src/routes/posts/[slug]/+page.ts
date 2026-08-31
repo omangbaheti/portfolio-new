@@ -1,23 +1,12 @@
 import { error } from '@sveltejs/kit';
+import { getPost, getPosts } from '$lib/content.js';
 
 export const prerender = true;
 
-// All markdown posts for prerendering + slug resolution.
-const modules = import.meta.glob('../../../content/posts/*.md', { eager: true }) as Record<
-	string,
-	{ metadata: Record<string, unknown>; default: unknown }
->;
+export const entries = () => getPosts().map((p) => ({ slug: p.slug }));
 
-export const entries = () =>
-	Object.keys(modules).map((path) => ({ slug: path.split('/').pop()!.replace('.md', '') }));
-
-export async function load({ params }: { params: { slug: string } }) {
-	const match = Object.entries(modules).find(([path]) => path.endsWith(`/${params.slug}.md`));
-	if (!match) error(404, 'Post not found');
-
-	const [, module] = match;
-	return {
-		metadata: module.metadata,
-		content: module.default
-	};
+export function load({ params }: { params: { slug: string } }) {
+	const post = getPost(params.slug);
+	if (!post) error(404, 'Post not found');
+	return post;
 }

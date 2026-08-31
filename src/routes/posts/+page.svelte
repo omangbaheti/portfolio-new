@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { reveal } from '$lib/reveal';
+
 	let { data } = $props();
 	const posts = $derived(data.posts);
 </script>
@@ -14,8 +16,12 @@
 	</div>
 
 	<div class="container list">
-		{#each posts as post (post.slug)}
-			<a class="post box" href="/posts/{post.slug}">
+		{#each posts as post, i (post.slug)}
+			<a
+				class="post box anim-wub press"
+				href="/posts/{post.slug}"
+				use:reveal={{ delay: Math.min(i, 5) * 70 }}
+			>
 				<span class="display post-date">{post.date}</span>
 				<div class="post-main">
 					<h3 class="display post-title">{post.title}</h3>
@@ -23,10 +29,10 @@
 						<p>{post.description}</p>
 					{/if}
 				</div>
-				<span class="mono-label read">READ →</span>
+				<span class="mono-label read">LOAD CARTRIDGE →</span>
 			</a>
 		{:else}
-			<span class="mono-label">No posts on record.</span>
+			<span class="mono-label">No cartridges on record.</span>
 		{/each}
 	</div>
 </section>

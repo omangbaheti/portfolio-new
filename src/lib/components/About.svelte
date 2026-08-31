@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { reveal } from '$lib/reveal';
+
 	const stats = [
 		{ n: '8+', label: 'Years XR' },
 		{ n: '200+', label: 'Participants' },
@@ -24,7 +26,7 @@
 <section id="about" class="about">
 	<div class="container grid">
 		<!-- Portrait -->
-		<div class="portrait-col">
+		<div class="portrait-col" use:reveal={{ delay: 60 }}>
 			<div class="portrait panel flat-shadow">
 				<img src={portrait} alt="Portrait" class="portrait-img" />
 				<span class="mono-label portrait-cap">{setup}</span>
@@ -36,7 +38,7 @@
 		</div>
 
 		<!-- Bio -->
-		<div class="bio-col">
+		<div class="bio-col" use:reveal={{ delay: 90 }}>
 			<div class="head">
 				<span class="eyebrow">PLAYER PROFILE</span>
 				<h2 class="display title">About</h2>
@@ -59,8 +61,11 @@
 
 			<!-- Stats -->
 			<div class="stats">
-				{#each stats as s (s.label)}
-					<div class="stat panel-dk flat-shadow">
+				{#each stats as s, i (s.label)}
+				<div
+					class="stat panel-dk flat-shadow"
+					use:reveal={{ delay: i * 80 }}
+				>
 						<span class="display stat-n">{s.n}</span>
 						<span class="mono-label stat-label">{s.label}</span>
 					</div>

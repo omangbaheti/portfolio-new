@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { reveal } from '$lib/reveal';
+
 	const types = [
 		'VR Experience',
 		'AR Application',
@@ -17,21 +19,20 @@
 		{ label: 'RESPONSE', value: '< 24 hours' }
 	];
 
-	const socials = [
-		{ label: 'GITHUB', href: 'https://github.com' },
-		{ label: 'LINKEDIN', href: 'https://www.linkedin.com' },
-		{ label: 'SCHOLAR', href: 'https://scholar.google.com' }
-	];
-
 	let form = $state({ name: '', email: '', type: '', message: '' });
 	let sent = $state(false);
 	let focused = $state('');
+
+	function onSubmit(e: SubmitEvent) {
+		e.preventDefault();
+		sent = true;
+	}
 </script>
 
 <section id="contact" class="contact">
 	<div class="container grid">
 		<!-- Left -->
-		<div class="left">
+		<div class="left" use:reveal>
 			<div class="head">
 				<span class="eyebrow">START A FIGHT</span>
 				<h2 class="display title">Start a<br />Project</h2>
@@ -50,25 +51,17 @@
 					</div>
 				{/each}
 			</div>
-
-			<div class="socials">
-				{#each socials as s (s.label)}
-					<a href={s.href} class="social" target="_blank" rel="noreferrer">
-						<span class="s-label mono-label">{s.label}</span>
-					</a>
-				{/each}
-			</div>
 		</div>
 
 		<!-- Form -->
-		<div class="form-col">
+		<div class="form-col" use:reveal={{ delay: 90 }}>
 			{#if sent}
 				<div class="sent panel-dk flat-shadow">
 					<span class="mono-label sent-tag">TRANSMISSION RECEIVED</span>
 					<h3 class="display sent-title">Fight<br />on!</h3>
 				</div>
 			{:else}
-				<form onsubmit={sent = true} class="form">
+				<form onsubmit={onSubmit} class="form">
 					<div class="field-row">
 						<div class="field">
 							<span class="mono-label label">{'NAME'}</span>
@@ -102,7 +95,7 @@
 							{#each types as type (type)}
 								<button
 									type="button"
-									class="chip"
+									class="chip anim-wub press"
 									class:active={form.type === type}
 									onclick={() => (form.type = type)}
 								>
@@ -125,7 +118,7 @@
 						></textarea>
 					</div>
 
-					<button type="submit" class="submit display">Send Message →</button>
+					<button type="submit" class="submit display anim-wub press">Send Fight →</button>
 				</form>
 			{/if}
 		</div>
@@ -184,33 +177,6 @@
 	.val {
 		color: var(--cream);
 	}
-
-	.socials {
-		margin-top: 28px;
-		display: flex;
-		gap: 20px;
-		flex-wrap: wrap;
-	}
-	.social {
-		display: inline-flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 4px;
-		border: 2px solid var(--char);
-		padding: 12px 16px;
-		box-shadow: var(--flat-shadow);
-		transition: background 0.15s, color 0.15s;
-	}
-	.social:hover {
-		background: var(--orange);
-	}
-	.social:hover .s-label {
-		color: var(--cream);
-	}
-	.s-label {
-		color: var(--char);
-	}
-
 	.form {
 		display: flex;
 		flex-direction: column;

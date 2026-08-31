@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { reveal } from '$lib/reveal';
+
 	const twoVoice = [
 		{
 			role: 'Developer',
@@ -20,7 +22,7 @@
 
 <section id="process" class="process">
 	<div class="container">
-		<div class="head">
+		<div class="head" use:reveal>
 			<span class="eyebrow">HOW I WORK</span>
 			<h2 class="display title">Process</h2>
 		</div>
@@ -28,7 +30,10 @@
 		<!-- Two-voice panel -->
 		<div class="two-voice">
 			{#each twoVoice as v, idx (v.role)}
-				<div class="voice panel grain">
+				<div
+					class="voice panel grain"
+					use:reveal={{ delay: idx * 90 }}
+				>
 					<div class="voice-head">
 						<span class="voice-dot first={idx === 0}" aria-hidden="true"></span>
 						<span class="mono-label voice-role" class:orange={idx === 0} class:cream-text={idx !== 0}>
@@ -42,8 +47,11 @@
 
 		<!-- Steps -->
 		<div class="steps">
-			{#each process as s (s.n)}
-				<div class="step panel-dk grain">
+			{#each process as s, i (s.n)}
+				<div
+					class="step panel-dk grain"
+					use:reveal={{ delay: i * 90 }}
+				>
 					<span class="step-n display">{s.n}</span>
 					<h3 class="display step-title">{s.title}</h3>
 					<p class="step-body mono-label">{s.body}</p>

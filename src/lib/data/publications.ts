@@ -7,6 +7,7 @@ export type Publication = {
 	doi?: string;
 	pdf?: string;
 	tags: string[];
+	img?: string;
 };
 
 export const publications: Publication[] = [
@@ -17,7 +18,8 @@ export const publications: Publication[] = [
 		venue: 'CHI ’25 — ACM Conference on Human Factors in Computing Systems',
 		year: '2025',
 		doi: '10.1145/xxxx.xxxx',
-		tags: ['XR', 'HCI', 'Study']
+		tags: ['XR', 'HCI', 'Study'],
+		img: '/img/placeholder-square.jpg'
 	},
 	{
 		slug: 'dwell-time-ambiguity',
@@ -26,7 +28,8 @@ export const publications: Publication[] = [
 		venue: 'ISS ’24 — ACM Interactive Surfaces and Spaces',
 		year: '2024',
 		doi: '10.1145/xxxx.xxxx',
-		tags: ['UX Research', 'Eye Tracking']
+		tags: ['UX Research', 'Eye Tracking'],
+		img: '/img/placeholder-square.jpg'
 	},
 	{
 		slug: 'local-first-field-tools',
@@ -34,6 +37,7 @@ export const publications: Publication[] = [
 		authors: 'F. Lastname',
 		venue: 'VL/HCC ’24 — IEEE Symposium on Visual Languages and Human-Centric Computing',
 		year: '2024',
-		tags: ['Software Engineering']
+		tags: ['Software Engineering'],
+		img: '/img/placeholder-square.jpg'
 	}
 ];

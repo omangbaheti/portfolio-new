@@ -1,10 +1,14 @@
 <script lang="ts">
 	import type { Project } from '$lib/data/projects.js';
+	import { reveal } from '$lib/reveal';
 
-	let { project }: { project: Project } = $props();
+	let {
+		project,
+		revealDelay = 0
+	}: { project: Project; revealDelay?: number } = $props();
 </script>
 
-<a class="tile" href="/projects/{project.slug}">
+<a class="tile press" href="/projects/{project.slug}" use:reveal={{ delay: revealDelay }}>
 	<!-- Thumbnail: renders static img or animated gif -->
 	<div class="thumb-wrap">
 		<img class="thumb" src={project.img} alt={project.alt} loading="lazy" />
@@ -86,6 +90,7 @@
 		color: var(--cream);
 		border: 1px solid rgba(239, 227, 208, 0.35);
 		text-transform: uppercase;
+		border-radius: 6px;
 	}
 	.tag-xr {
 		color: var(--orange);
@@ -106,6 +111,7 @@
 		padding: 4px 8px;
 		opacity: 0;
 		transition: opacity 0.15s;
+		border-radius: 6px;
 	}
 	.tile:hover .case {
 		opacity: 1;
@@ -159,6 +165,7 @@
 		color: var(--cream);
 		border: 1px solid rgba(239, 227, 208, 0.35);
 		padding: 3px 8px;
+		border-radius: 6px;
 	}
 	.tile:hover .pill {
 		color: var(--char);

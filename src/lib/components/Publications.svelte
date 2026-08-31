@@ -1,27 +1,26 @@
 <script lang="ts">
 	import { publications } from '$lib/data/publications.js';
+	import { reveal } from '$lib/reveal';
 </script>
 
-<svelte:head>
-	<title>Publications // OMANG BAHETI</title>
-</svelte:head>
-
-<section class="pub-page">
-	<div class="container head">
+<section id="publications" class="pub-section">
+	<div class="container head" use:reveal>
 		<span class="eyebrow">RESEARCH LOG</span>
 		<h2 class="display title">Publications</h2>
 	</div>
 
 	<div class="container list">
-		{#each publications as pub (pub.title)}
-			<article class="pub panel flat-shadow">
+		{#each publications as pub, i (pub.title)}
+			<article
+				class="pub panel flat-shadow"
+				use:reveal={{ delay: Math.min(i, 4) * 90 }}
+			>
 				<div class="pub-side">
-					<span class="display pub-year">{pub.year}</span>
-					<div class="tags">
-						{#each pub.tags as tag (tag)}
-							<span class="pill mono-label">{tag}</span>
-						{/each}
-					</div>
+					{#if pub.img}
+						<img class="pub-thumb" src={pub.img} alt="" />
+					{:else}
+						<span class="display pub-year">{pub.year}</span>
+					{/if}
 				</div>
 				<div class="pub-main">
 					<a class="pub-link" href="/publications/{pub.slug}">
@@ -29,6 +28,11 @@
 					</a>
 					<span class="mono-label pub-authors">{pub.authors}</span>
 					<p class="pub-venue">{pub.venue}</p>
+					<div class="tags">
+						{#each pub.tags as tag (tag)}
+							<span class="pill mono-label">{tag}</span>
+						{/each}
+					</div>
 				</div>
 				<div class="pub-links">
 					{#if pub.doi}
@@ -45,8 +49,8 @@
 </section>
 
 <style>
-	.pub-page {
-		padding: 64px 0 40px;
+	.pub-section {
+		padding: 80px 0 40px;
 	}
 	.head {
 		padding: 0 24px;
@@ -94,17 +98,25 @@
 		color: var(--orange);
 		font-size: 30px;
 	}
+	.pub-thumb {
+		width: 100%;
+		aspect-ratio: 1 / 1;
+		object-fit: cover;
+		border: 2px solid var(--char);
+		display: block;
+	}
 	.tags {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 8px;
-		margin-top: 14px;
+		margin-top: 12px;
 	}
 	.pill {
 		color: var(--orange);
 		border: 1px solid var(--orange);
 		padding: 4px 10px;
 		font-size: 9px;
+		border-radius: 6px;
 	}
 
 	.pub-title {

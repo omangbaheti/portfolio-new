@@ -10,7 +10,7 @@
 
 <article class="article">
 	<header class="article-head container">
-		<a class="back mono-label" href="/posts">← ALL POSTS</a>
+		<a class="back mono-label anim-wub press" href="/posts">← ALL POSTS</a>
 		<span class="mono-label meta">POST / {data.metadata.date}</span>
 		<h1 class="display title">{data.metadata.title}</h1>
 		{#if data.metadata.tags}
@@ -50,7 +50,7 @@
 		padding: 48px 0 60px;
 	}
 	.article-head {
-		max-width: 800px;
+		max-width: 860px;
 		padding: 0 24px;
 	}
 	.back,
@@ -80,10 +80,11 @@
 		border: 1px solid var(--orange);
 		padding: 4px 10px;
 		font-size: 9px;
+		border-radius: 6px;
 	}
 
 	.embed-wrap {
-		max-width: 800px;
+		max-width: 860px;
 		padding: 0 24px;
 		margin-top: 24px;
 	}
@@ -98,9 +99,8 @@
 		aspect-ratio: 16 / 9;
 		border: none;
 	}
-
 	.prose-wrap {
-		max-width: 800px;
+		max-width: 860px;
 		padding: 0 24px;
 		margin-top: 28px;
 	}

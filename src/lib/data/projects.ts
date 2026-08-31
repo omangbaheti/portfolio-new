@@ -13,7 +13,6 @@ export type Project = {
 	alt: string;
 	desc: string;
 	slug: string;
-	highlight?: boolean;
 };
 
 export const projects: Project[] = [
@@ -29,7 +28,6 @@ export const projects: Project[] = [
 		img: 'https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?w=1200&h=800&fit=crop&auto=format',
 		alt: 'Dark atmospheric VR environment',
 		desc: 'Single-player horror, 6DOF. Three months of presence research with 42 participants shaped every design decision before an asset was built.',
-		highlight: true,
 		slug: 'void-protocol'
 	},
 	{
@@ -58,7 +56,6 @@ export const projects: Project[] = [
 		img: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=900&h=600&fit=crop&auto=format',
 		alt: 'Arena game',
 		desc: 'Custom rollback netcode. Four embedded playtest cohorts drove a full UI redesign between alpha and ship.',
-		highlight: true,
 		slug: 'nexus-arena'
 	},
 	{
@@ -73,7 +70,6 @@ export const projects: Project[] = [
 		img: 'https://images.unsplash.com/photo-1576502200916-3808e07386a5?w=900&h=700&fit=crop&auto=format',
 		alt: 'Mixed reality installation',
 		desc: '60 participants. Heatmaps, task-completion analysis, and retrospective interviews across two headset generations.',
-		highlight: true,
 		slug: 'spatial-mental-models'
 	},
 	{

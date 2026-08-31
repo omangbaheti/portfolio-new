@@ -10,7 +10,6 @@
 
 <article class="pub-page">
 	<header class="pub-head container">
-		<a class="back mono-label" href="/publications">← ALL PUBLICATIONS</a>
 		<span class="mono-label meta">RESEARCH / {pub.year}</span>
 		<h1 class="display title">{pub.title}</h1>
 		<span class="mono-label authors">{pub.authors}</span>
@@ -24,10 +23,10 @@
 
 		<div class="links">
 			{#if pub.doi}
-				<a class="btn-ghosty" href="https://doi.org/{pub.doi}" target="_blank" rel="noreferrer">DOI ↗</a>
+				<a class="btn-ghosty anim-wub press" href="https://doi.org/{pub.doi}" target="_blank" rel="noreferrer">DOI ↗</a>
 			{/if}
 			{#if pub.pdf}
-				<a class="btn-ghosty" href={pub.pdf} target="_blank" rel="noreferrer">PDF ↗</a>
+				<a class="btn-ghosty anim-wub press" href={pub.pdf} target="_blank" rel="noreferrer">PDF ↗</a>
 			{/if}
 		</div>
 	</header>
@@ -68,16 +67,9 @@
 		align-items: center;
 		text-align: center;
 	}
-	.back,
 	.meta {
 		color: var(--orange);
 		display: block;
-	}
-	.back {
-		margin-bottom: 18px;
-	}
-	.back:hover {
-		color: var(--char);
 	}
 	.title {
 		font-size: clamp(1.9rem, 6vw, 3.2rem);
@@ -105,6 +97,7 @@
 		border: 1px solid var(--orange);
 		padding: 4px 10px;
 		font-size: 9px;
+		border-radius: 6px;
 	}
 	.links {
 		display: flex;
@@ -129,7 +122,7 @@
 	}
 
 	.body {
-		max-width: 720px;
+		max-width: 860px;
 		margin: 0 auto;
 		margin-top: 34px;
 		padding: 0 24px;

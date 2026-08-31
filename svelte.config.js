@@ -17,7 +17,10 @@ const config = {
 			fallback: 'index.html',
 			precompress: false,
 			strict: true
-		})
+		}),
+		prerender: {
+			handleMissingId: 'ignore'
+		}
 	},
 	extensions: ['.svelte', '.md']
 };
