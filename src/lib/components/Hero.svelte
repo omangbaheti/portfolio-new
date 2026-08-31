@@ -1,14 +1,14 @@
 <script lang="ts">
 	let { name = 'OMANG BAHETI' } = $props();
-	import { backOut, backIn } from 'svelte/easing';
+	import { backOut, backIn, elasticOut } from 'svelte/easing';
 	import { onDestroy } from 'svelte';
 
 	import vrImage from '../../assets/VRHeadset.png?url';
-	import controllerImg from '../../assets/controller.png?url';
-	import gridImg from '../../assets/grid.png?url';
-	import neuralImg from '../../assets/neural-network.png?url';
-	import notebookImg from '../../assets/notebook.png?url';
-	import robotImg from '../../assets/robot.png?url';
+	import controllerImg from '../../assets/controller.svg?url';
+	import gridImg from '../../assets/grid.svg?url';
+	import neuralImg from '../../assets/neural-network.svg?url';
+	import notebookImg from '../../assets/notebook.svg?url';
+	import robotImg from '../../assets/robot.svg?url';
 	import SocialIcon from '$lib/components/SocialIcon.svelte';
 
 	// Split the name into letters for the hover-raise wave
@@ -22,7 +22,7 @@
 	------------------------------------------------------------------ */
 	type Pose = { x: number; y: number; rot: number; s: number; o: number };
 
-	const CENTER: Pose = { x: 50, y: 50, rot: 0, s: 0.6, o: 0 };
+	const CENTER: Pose = { x: 50, y: 50, rot: 0, s: 0.45, o: 0 };
 
 	const lerpPose = (a: Pose, b: Pose, t: number): Pose => ({
 		x: a.x + (b.x - a.x) * t,
@@ -32,18 +32,19 @@
 		o: a.o + (b.o - a.o) * t
 	});
 
-	// Final fan-out poses (x/y = % of stage centre, rot = settle degrees).
+	// Final fan-out poses (x/y = % of stage centre, rot = settle tilt degrees).
 	// Order here sets the stagger: robot(12) → grid(2) → controller(6) →
 	// grid(7) → neural(9) → notebook(5).
 	// tdur/tdelay tune the tilt-stop-motion per asset so robot & controller
 	// rock out of sync (different duration + phase offset).
+	// rot = playful final tilt; the entrance over-rotates then springs back.
 	const fans = [
-		{ key: 'robot',      src: robotImg,      z: 3, w: 29,   anim: 'tilt', tdur: 1.3,  tdelay: 0,     to: { x: 28, y: 8,   rot: 0, s: 1, o: 1 } },
+		{ key: 'robot',      src: robotImg,      z: 3, w: 29,   anim: 'tilt', tdur: 1.1,  tdelay: 0,     to: { x: 28, y: 8,   rot: -4, s: 1, o: 1 } },
 		{ key: 'grid-2',     src: gridImg,       z: 1, w: 38, to: { x: 68, y: 33, rot: 4,  s: 1, o: 1 } },
-		{ key: 'controller', src: controllerImg, z: 3, w: 31, anim: 'tilt', tdur: 1.7,  tdelay: -0.4, to: { x: 50, y: 106, rot: 0, s: 1, o: 1 } },
+		{ key: 'controller', src: controllerImg, z: 3, w: 31, anim: 'tilt', tdur: 1.6,  tdelay: -0.6, to: { x: 50, y: 106, rot: 6, s: 1, o: 1 } },
 		{ key: 'grid-7',     src: gridImg,       z: 1, w: 38, to: { x: 20, y: 91, rot: -4, s: 1, o: 1 } },
-		{ key: 'neural',     src: neuralImg,     z: 3, w: 24, anim: 'bob',  to: { x: 16, y: 90, rot: 0, s: 1, o: 1 } },
-		{ key: 'notebook',   src: notebookImg,   z: 3, w: 38, anim: 'bob',  to: { x: 86, y: 94, rot: 0, s: 1, o: 1 } }
+		{ key: 'neural',     src: neuralImg,     z: 3, w: 24, anim: 'bob',  tdur: 1.4,  tdelay: 0.35, to: { x: 2, y: 35, rot: -3, s: 1, o: 1 } },
+		{ key: 'notebook',   src: notebookImg,   z: 3, w: 38, anim: 'bob',  tdur: 1.9,  tdelay: 0.15, to: { x: 86, y: 94, rot: 5,  s: 1, o: 1 } }
 	];
 
 	// Reactive poses keyed by asset key (top-level $state = clean runes).
@@ -83,20 +84,56 @@
 		// Cancel any in-flight tweens; each asset resumes from its current pose.
 		active = [];
 		const now = performance.now();
-		fans.forEach((f, i) => {
-			const to = hover ? f.to : CENTER;
-			const delay = hover ? i * 40 : (fans.length - 1 - i) * 30;
-			const duration = hover ? 700 : 490; // exit ~70% of entrance
-			active.push({
-				key: f.key,
-				from: { ...poses[f.key] },
-				to,
-				start: now,
-				delay,
-				duration,
-				easing: hover ? backOut : backIn
+		if (hover) {
+			/* Entrance has two phases per asset:
+			   1. Throw: fast backOut fly-out that lands slightly squashed and
+			      over-rotated (s * 0.88, rot - 10°).
+			   2. Boing: a short elasticOut spring from the squashed pose up into
+			      the final pose — overshoots ~4-5% past target, wobbles to rest.
+			   Grid backdrops (z:1) get a damped kick so they sit back quietly
+			   while the foreground props do the popping. */
+			fans.forEach((f, i) => {
+				const delay = i * 90; // rippling cascade
+				const kick = f.z === 1 ? 0.5 : 1; // foreground pops harder
+				const land = {
+					...f.to,
+					s: f.to.s * (1 - 0.12 * kick),
+					rot: f.to.rot - 10 * kick,
+					o: 1
+				};
+				active.push({
+					key: f.key,
+					from: { ...poses[f.key] },
+					to: land,
+					start: now,
+					delay,
+					duration: 480,
+					easing: backOut
+				});
+				active.push({
+					key: f.key,
+					from: { ...land },
+					to: { ...f.to, o: 1 },
+					start: now,
+					delay: delay + 480,
+					duration: 260,
+					easing: elasticOut
+				});
 			});
-		});
+		} else {
+			/* Exit: quick reel back into the stack, backdrops lead, props follow. */
+			fans.forEach((f, i) => {
+				active.push({
+					key: f.key,
+					from: { ...poses[f.key] },
+					to: CENTER,
+					start: now,
+					delay: (fans.length - 1 - i) * 22,
+					duration: 340,
+					easing: backIn
+				});
+			});
+		}
 		if (!raf) raf = requestAnimationFrame(tick);
 	}
 
