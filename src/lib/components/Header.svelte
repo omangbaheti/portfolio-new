@@ -235,6 +235,7 @@
 		width: 44px;
 		height: 44px;
 		object-fit: cover;
+		background: var(--char);
 		border: 2px solid var(--char);
 		box-shadow: var(--flat-shadow);
 	}
