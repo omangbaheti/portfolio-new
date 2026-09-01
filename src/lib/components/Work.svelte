@@ -6,7 +6,7 @@
 
 <section id="work" class="work">
 	<div class="section-head container" use:reveal>
-		<h2 class="display sect-title">Featured<br />Works</h2>
+		<h2 class="display sect-title">Featured Works</h2>
 	</div>
 
 	<div class="grid container">

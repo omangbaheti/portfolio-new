@@ -278,6 +278,16 @@ textarea,
 	border-radius: 14px;
 }
 
+/* ---------- Custom arcade cursor ----------
+
+CustomCursor.svelte adds the `custom-cursor` class to <html> only while it is
+actually running (fine pointer + `prefers-reduced-motion` off). Hide the native
+cursor in exactly that case — everything else keeps normal cursors. */
+html.custom-cursor,
+html.custom-cursor * {
+	cursor: none !important;
+}
+
 /* ============================================================
    PRINT / PORTFOLIO PDF
    Headless-browser friendly rules so `print-to-pdf` produces a

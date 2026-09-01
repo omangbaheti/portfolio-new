@@ -49,12 +49,13 @@
 		overflow: hidden;
 		color: inherit;
 		text-decoration: none;
-		transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+		transition:
+			transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+			box-shadow 0.3s ease;
 	}
 	.tile:hover {
-		transform: translateY(-3px);
-		box-shadow: var(--flat-shadow);
-		background: var(--cream);
+		transform: scale(1.03) rotate(0.5deg);
+		box-shadow: 9px 9px 0 rgba(28, 27, 25, 0.22);
 	}
 
 	/* Thumbnail (starts as a dark cinematic strip) */
@@ -135,9 +136,6 @@
 		font-size: clamp(1.3rem, 2.6vw, 1.7rem);
 		line-height: 0.95;
 	}
-	.tile:hover .title {
-		color: var(--char);
-	}
 	.subtitle {
 		color: var(--orange);
 		font-size: 10px;
@@ -149,9 +147,6 @@
 		font-weight: 300;
 		color: rgba(239, 227, 208, 0.7);
 		margin-top: 8px;
-	}
-	.tile:hover .desc {
-		color: var(--char);
 	}
 	.tags {
 		display: flex;
@@ -166,9 +161,5 @@
 		border: 1px solid rgba(239, 227, 208, 0.35);
 		padding: 3px 8px;
 		border-radius: 6px;
-	}
-	.tile:hover .pill {
-		color: var(--char);
-		border-color: rgba(28, 27, 25, 0.35);
 	}
 </style>
