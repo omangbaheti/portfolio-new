@@ -160,7 +160,7 @@
 	<div class="topbar-inner">
 		<!-- Logo / brand mark top-left -->
 		<a href="#work" class="brand press" onclick={(e) => onClick(e, '#work')} aria-label="Omang Baheti">
-			<span class="stamp" aria-hidden="true">OB</span>
+			<img class="stamp" src="/img/author.png" alt="Omang Baheti" />
 			<span class="brand-name display" aria-hidden="true">
 				{#each brandWords as word, wi (wi)}
 					{#if wi > 0}<br />{/if}
@@ -234,14 +234,7 @@
 	.stamp {
 		width: 44px;
 		height: 44px;
-		background: var(--char);
-		color: var(--beige);
-		display: grid;
-		place-items: center;
-		font-family: var(--font-display);
-		font-weight: 400;
-		font-size: 16px;
-		letter-spacing: 0.02em;
+		object-fit: cover;
 		border: 2px solid var(--char);
 		box-shadow: var(--flat-shadow);
 	}
