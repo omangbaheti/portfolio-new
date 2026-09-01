@@ -124,6 +124,8 @@
 		box-shadow: var(--flat-shadow);
 		position: relative;
 		overflow: hidden;
+		/* One shared motion cycle keeps the headset bob and button breathe in sync */
+		--cycle: 2.4s;
 	}
 	@media (min-width: 768px) {
 		.hero {
@@ -166,7 +168,7 @@
 		}
 	}
 	.bob {
-		animation: bob 2s steps(1, end) infinite;
+		animation: bob var(--cycle) steps(1, end) infinite;
 	}
 
 	.hero-grid {
@@ -230,7 +232,7 @@
 		transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.15s;
 		/* Subtle idle "breathing" — animates the individual `scale` property so
 		   it composes with the hover/press transforms instead of fighting them. */
-		animation: breathe 2.8s ease-in-out infinite;
+		animation: breathe var(--cycle) ease-in-out infinite;
 	}
 	.btn-contact:hover {
 		background: var(--char);
