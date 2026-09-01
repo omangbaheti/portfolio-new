@@ -101,6 +101,28 @@
 	margin: 32px 0;
 }
 
+	.prose details {
+		border: 1px solid rgba(239, 227, 208, 0.25);
+		border-radius: 10px;
+		padding: 12px 16px 4px;
+		margin: 20px 0;
+		background: rgba(239, 227, 208, 0.05);
+	}
+	.prose details[open] {
+		padding-bottom: 16px;
+	}
+	.prose summary {
+		cursor: pointer;
+		color: var(--orange);
+		font-family: var(--font-mono);
+		font-size: 12px;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+	}
+	.prose details pre {
+		margin: 14px 0 0;
+	}
+
 /* Embedded media — YouTube iframes etc. */
 .prose iframe,
 .prose video,

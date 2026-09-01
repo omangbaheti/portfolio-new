@@ -12,32 +12,24 @@ export type Publication = {
 
 export const publications: Publication[] = [
 	{
-		slug: 'reducing-cognitive-load-xr',
-		title: 'Reducing Cognitive Load in Room-Scale XR Workspaces',
-		authors: 'F. Lastname, A. Coauthor, B. Coauthor',
-		venue: 'CHI ’25 — ACM Conference on Human Factors in Computing Systems',
+		slug: 'thumbswype',
+		title: 'ThumbSwype: Thumb-to-Finger Gesture Based Text-Entry for Head Mounted Displays',
+		authors: 'Shariff AM Faleel, Rishav Banerjee, Omang Baheti, Khalad Hasan, Pourang Irani',
+		venue: 'Mobile HCI ’25 — ACM, Sharm-El-Sheikh, Egypt',
 		year: '2025',
-		doi: '10.1145/xxxx.xxxx',
-		tags: ['XR', 'HCI', 'Study'],
-		img: '/img/placeholder-square.jpg'
+		doi: '10.1145/3743708',
+		tags: ['XR', 'Text Entry', 'Hand Interactions'],
+		img: '/img/publications/thumbswype/featured.png'
 	},
 	{
-		slug: 'dwell-time-ambiguity',
-		title: 'Dwell-Time Signatures as an Indicator of Interface Ambiguity',
-		authors: 'F. Lastname, C. Coauthor',
-		venue: 'ISS ’24 — ACM Interactive Surfaces and Spaces',
-		year: '2024',
-		doi: '10.1145/xxxx.xxxx',
-		tags: ['UX Research', 'Eye Tracking'],
-		img: '/img/placeholder-square.jpg'
-	},
-	{
-		slug: 'local-first-field-tools',
-		title: 'Local-First Architectures for Offline Field Research Tools',
-		authors: 'F. Lastname',
-		venue: 'VL/HCC ’24 — IEEE Symposium on Visual Languages and Human-Centric Computing',
-		year: '2024',
-		tags: ['Software Engineering'],
-		img: '/img/placeholder-square.jpg'
+		slug: 'whats-the-thumb-doing',
+		title:
+			"What's the Thumb Doing? — Improving Precision for Thumb-to-Finger Interactions on Hand Proximate User Interfaces",
+		authors: 'Shariff AM Faleel, Rishav Banerjee, Omang Baheti, Khalad Hasan, Pourang Irani',
+		venue: 'GI ’25 — Graphics Interface, Kelowna, Canada',
+		year: '2025',
+		pdf: 'https://shariff-faleel.com/pdfs/faleel25_whats_the_thumb_doing.pdf',
+		tags: ['XR', 'Hand Interactions', 'HPUI'],
+		img: '/img/publications/whats-the-thumb-doing/featured.png'
 	}
 ];
