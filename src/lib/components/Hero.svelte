@@ -1,145 +1,10 @@
 <script lang="ts">
 	let { name = 'OMANG BAHETI' } = $props();
-	import { backOut, backIn, elasticOut } from 'svelte/easing';
-	import { onDestroy } from 'svelte';
-
 	import vrImage from '../../assets/VRHeadset.png?url';
-	import controllerImg from '../../assets/controller.svg?url';
-	import gridImg from '../../assets/grid.svg?url';
-	import neuralImg from '../../assets/neural-network.svg?url';
-	import notebookImg from '../../assets/notebook.svg?url';
-	import robotImg from '../../assets/robot.svg?url';
 	import SocialIcon from '$lib/components/SocialIcon.svelte';
 
 	// Split the name into letters for the hover-raise wave
 	const titleWords = $derived(name.split(' ').map((w) => w.split('')));
-
-	/* ------------------------------------------------------------------
-	   Hover fan-out: each asset starts stacked at the headset centre
-	   (opacity 0, scale 0.6) and tweens out to its clock position.
-	   Positions are % of the stage so the orbit stays proportional on
-	   every viewport.  z: 1 = grid (behind headset), 3 = in front.
-	------------------------------------------------------------------ */
-	type Pose = { x: number; y: number; rot: number; s: number; o: number };
-
-	const CENTER: Pose = { x: 50, y: 50, rot: 0, s: 0.45, o: 0 };
-
-	const lerpPose = (a: Pose, b: Pose, t: number): Pose => ({
-		x: a.x + (b.x - a.x) * t,
-		y: a.y + (b.y - a.y) * t,
-		rot: a.rot + (b.rot - a.rot) * t,
-		s: a.s + (b.s - a.s) * t,
-		o: a.o + (b.o - a.o) * t
-	});
-
-	// Final fan-out poses (x/y = % of stage centre, rot = settle tilt degrees).
-	// Order here sets the stagger: robot(12) → grid(2) → controller(6) →
-	// grid(7) → neural(9) → notebook(5).
-	// tdur/tdelay tune the tilt-stop-motion per asset so robot & controller
-	// rock out of sync (different duration + phase offset).
-	// rot = playful final tilt; the entrance over-rotates then springs back.
-	const fans = [
-		{ key: 'robot',      src: robotImg,      z: 3, w: 29,   anim: 'tilt', tdur: 1.1,  tdelay: 0,     to: { x: 28, y: 8,   rot: -4, s: 1, o: 1 } },
-		{ key: 'grid-2',     src: gridImg,       z: 1, w: 38, to: { x: 68, y: 33, rot: 4,  s: 1, o: 1 } },
-		{ key: 'controller', src: controllerImg, z: 3, w: 31, anim: 'tilt', tdur: 1.6,  tdelay: -0.6, to: { x: 50, y: 106, rot: 6, s: 1, o: 1 } },
-		{ key: 'grid-7',     src: gridImg,       z: 1, w: 38, to: { x: 20, y: 91, rot: -4, s: 1, o: 1 } },
-		{ key: 'neural',     src: neuralImg,     z: 3, w: 24, anim: 'bob',  tdur: 1.4,  tdelay: 0.35, to: { x: 2, y: 35, rot: -3, s: 1, o: 1 } },
-		{ key: 'notebook',   src: notebookImg,   z: 3, w: 38, anim: 'bob',  tdur: 1.9,  tdelay: 0.15, to: { x: 86, y: 94, rot: 5,  s: 1, o: 1 } }
-	];
-
-	// Reactive poses keyed by asset key (top-level $state = clean runes).
-	let poses = $state<Record<string, Pose>>({});
-	for (const f of fans) poses[f.key] = { ...CENTER };
-
-	// In-flight tween queue driven by a single requestAnimationFrame loop.
-	type Tween = {
-		key: string;
-		from: Pose;
-		to: Pose;
-		start: number;
-		delay: number;
-		duration: number;
-		easing: (t: number) => number;
-	};
-	let active: Tween[] = [];
-	let raf = 0;
-
-	function tick(now: number) {
-		const next: Tween[] = [];
-		for (const p of active) {
-			const elapsed = now - p.start - p.delay;
-			if (elapsed < 0) {
-				next.push(p); // still in stagger delay — hold current pose
-				continue;
-			}
-			const t = Math.min(elapsed / p.duration, 1);
-			poses[p.key] = lerpPose(p.from, p.to, p.easing(t));
-			if (t < 1) next.push(p);
-		}
-		active = next;
-		raf = next.length ? requestAnimationFrame(tick) : 0;
-	}
-
-	function animate(hover: boolean) {
-		// Cancel any in-flight tweens; each asset resumes from its current pose.
-		active = [];
-		const now = performance.now();
-		if (hover) {
-			/* Entrance has two phases per asset:
-			   1. Throw: fast backOut fly-out that lands slightly squashed and
-			      over-rotated (s * 0.88, rot - 10°).
-			   2. Boing: a short elasticOut spring from the squashed pose up into
-			      the final pose — overshoots ~4-5% past target, wobbles to rest.
-			   Grid backdrops (z:1) get a damped kick so they sit back quietly
-			   while the foreground props do the popping. */
-			fans.forEach((f, i) => {
-				const delay = i * 90; // rippling cascade
-				const kick = f.z === 1 ? 0.5 : 1; // foreground pops harder
-				const land = {
-					...f.to,
-					s: f.to.s * (1 - 0.12 * kick),
-					rot: f.to.rot - 10 * kick,
-					o: 1
-				};
-				active.push({
-					key: f.key,
-					from: { ...poses[f.key] },
-					to: land,
-					start: now,
-					delay,
-					duration: 480,
-					easing: backOut
-				});
-				active.push({
-					key: f.key,
-					from: { ...land },
-					to: { ...f.to, o: 1 },
-					start: now,
-					delay: delay + 480,
-					duration: 260,
-					easing: elasticOut
-				});
-			});
-		} else {
-			/* Exit: quick reel back into the stack, backdrops lead, props follow. */
-			fans.forEach((f, i) => {
-				active.push({
-					key: f.key,
-					from: { ...poses[f.key] },
-					to: CENTER,
-					start: now,
-					delay: (fans.length - 1 - i) * 22,
-					duration: 340,
-					easing: backIn
-				});
-			});
-		}
-		if (!raf) raf = requestAnimationFrame(tick);
-	}
-
-	onDestroy(() => {
-		if (raf) cancelAnimationFrame(raf);
-	});
 </script>
 
 <!-- Title block: name at top center in black, subtitle in leverless style -->
@@ -154,7 +19,7 @@
 			{/each}
 		</span>
 	</h1>
-	<span class="eyebrow page-sub">Software/XR Developer | UX Researcher | Game Designer</span>
+	<span class="eyebrow page-sub">Software Developer | XR Engineer | UX Researcher</span>
 </div>
 
 <!-- Large hero panel -->
@@ -164,39 +29,9 @@
 	<div class="dotburst burst-br" aria-hidden="true"></div>
 
 	<div class="hero-grid">
-		<!-- VR headset + orbiting assets -->
-		<div
-			class="hero-art"
-			role="img"
-			aria-label="VR headset with orbiting project icons"
-			onmouseenter={() => animate(true)}
-			onmouseleave={() => animate(false)}
-		>
-			<div class="stage">
-					{#each fans as f (f.key)}
-						<div
-							class="orbit"
-							class:grid={f.key.startsWith('grid')}
-							aria-hidden="true"
-							style:width="{f.w}%"
-							style:z-index={f.z}
-							style:left="{poses[f.key].x}%"
-							style:top="{poses[f.key].y}%"
-							style:opacity={poses[f.key].o}
-							style:transform="translate(-50%, -50%) rotate({poses[f.key].rot}deg) scale({poses[f.key].s})"
-						>
-							<img
-								class="orbit-img {f.anim === 'tilt' ? 'tilt' : ''} {f.anim === 'bob' ? 'bob-up' : ''}"
-								src={f.src}
-								alt=""
-								style:animation-duration={f.tdur ? f.tdur + 's' : ''}
-								style:animation-delay={f.tdelay !== undefined ? f.tdelay + 's' : ''}
-							/>
-						</div>
-					{/each}
-
-				<img class="vr-photo bob" src={vrImage} alt="VR headset illustration" />
-			</div>
+		<!-- VR headset -->
+		<div class="hero-art">
+			<img class="vr-photo bob" src={vrImage} alt="VR headset illustration" />
 		</div>
 
 		<!-- Description + actions -->
@@ -277,6 +112,7 @@
 		display: block;
 		margin-top: 16px;
 		font-weight: 700;
+		font-size: 18px;
 	}
 
 	/* ---- hero ---- */
@@ -295,25 +131,15 @@
 		}
 	}
 
-	/* ---- headset stage + fan-out ---- */
+	/* ---- headset ---- */
 	.hero-art {
 		position: relative;
-		overflow: visible;
-		padding: 60px 48px 76px;
 	}
-	.stage {
-		position: relative;
-	}
-
-	/* Headset is the in-flow base of the stage; z-index 2 puts it between
-	   the grid (1) and the front assets (3). */
 	.vr-photo {
 		width: 100%;
 		height: auto;
 		object-fit: contain;
 		display: block;
-		position: relative;
-		z-index: 2;
 	}
 
 	/* Stop-motion bob: discrete translateY steps, no easing between frames.
@@ -324,7 +150,7 @@
 		}
 		20% {
 			transform: translateY(-8px);
-	}
+		}
 		40% {
 			transform: translateY(-3px);
 		}
@@ -342,64 +168,7 @@
 		animation: none;
 	}
 	.hero-art:hover .bob {
-		animation: bob 1s steps(1, end) infinite;
-	}
-
-	/* Orbiting assets — absolutely centred on the stage, moved by tweens.
-	   The wrapper carries the tweened pose; the inner img carries the idle
-	   stop-motion (tilt/bob) so the two transforms compose instead of clash. */
-	.orbit {
-		position: absolute;
-		display: block;
-		will-change: transform, opacity, left, top;
-	}
-	.orbit-img {
-		display: block;
-		width: 100%;
-		height: auto;
-	}
-
-	/* Stop-motion satellites: discrete keyframes, no easing between frames */
-	@keyframes satTilt {
-		0% {
-			transform: rotate(-6deg);
-		}
-		30% {
-			transform: rotate(6deg);
-		}
-		55% {
-			transform: rotate(-3deg);
-		}
-		80% {
-			transform: rotate(5deg);
-		}
-		100% {
-			transform: rotate(-6deg);
-		}
-	}
-	@keyframes satBob {
-		0% {
-			transform: translateY(0);
-		}
-		25% {
-			transform: translateY(-9px);
-		}
-		50% {
-			transform: translateY(-3px);
-		}
-		75% {
-			transform: translateY(-7px);
-		}
-		100% {
-			transform: translateY(0);
-		}
-	}
-	/* Idle animations only play while the fan-out is shown (hover) */
-	.hero-art:hover .orbit-img.tilt {
-		animation: satTilt 1.3s steps(1, end) infinite;
-	}
-	.hero-art:hover .orbit-img.bob-up {
-		animation: satBob 1.2s steps(1, end) infinite;
+		animation: bob 2s steps(1, end) infinite;
 	}
 
 	.hero-grid {
@@ -476,7 +245,7 @@
 			scale: 1;
 		}
 		50% {
-			scale: 1.085;
+			scale: 1.15;
 		}
 	}
 

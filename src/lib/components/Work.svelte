@@ -1,43 +1,16 @@
 <script lang="ts">
-	import { projects, type Discipline } from '$lib/data/projects.js';
+	import { projects } from '$lib/data/projects.js';
 	import ProjectTile from './ProjectTile.svelte';
 	import { reveal } from '$lib/reveal';
-
-	type Filter = 'all' | Discipline;
-	const filters: { k: Filter; l: string }[] = [
-		{ k: 'all', l: 'F1 ALL' },
-		{ k: 'xr', l: 'F2 DEV' },
-		{ k: 'ux', l: 'F3 RESEARCH' }
-	];
-
-	let filter = $state<Filter>('all');
-	const visible = $derived(
-		filter === 'all' ? projects : projects.filter((p) => p.discipline === filter)
-	);
 </script>
 
 <section id="work" class="work">
 	<div class="section-head container" use:reveal>
-		<div>
-			<h2 class="display sect-title">Featured<br />Works</h2>
-		</div>
-
-		<!-- Filter — fightstick function keys -->
-		<div class="filters">
-			{#each filters as f (f.k)}
-				<button
-					class="filter-btn display anim-wub press"
-					class:active={filter === f.k}
-					onclick={() => (filter = f.k)}
-				>
-					{f.l}
-				</button>
-			{/each}
-		</div>
+		<h2 class="display sect-title">Featured<br />Works</h2>
 	</div>
 
 	<div class="grid container">
-		{#each visible as project, i (project.slug)}
+		{#each projects as project, i (project.slug)}
 			<ProjectTile {project} revealDelay={Math.min(i, 5) * 70} />
 		{/each}
 	</div>
@@ -72,39 +45,6 @@
 		color: var(--char);
 		margin-top: 10px;
 		line-height: 0.85;
-	}
-	.filters {
-		display: inline-flex;
-		border: 2px solid var(--char);
-		box-shadow: var(--flat-shadow);
-		align-self: flex-start;
-		background: var(--beige);
-	}
-	.filter-btn {
-		font-family: var(--font-subs);
-		font-weight: 500;
-		letter-spacing: 0.1em;
-		font-size: 12px;
-		background: transparent;
-		color: var(--char);
-		border: none;
-		border-right: 2px solid var(--char);
-		padding: 12px 20px;
-		cursor: pointer;
-		text-transform: uppercase;
-		transition: background 0.15s, color 0.15s;
-	}
-	.filter-btn:last-child {
-		border-right: none;
-	}
-	.filter-btn:hover {
-		background: var(--char);
-		color: var(--cream);
-	}
-	.filter-btn.active {
-		background: var(--orange);
-		color: var(--cream);
-		border-color: var(--char);
 	}
 
 	.grid {

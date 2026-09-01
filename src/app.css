@@ -220,7 +220,7 @@ img {
 }
 .reveal.revealed {
 	opacity: 1;
-	animation: pop-in 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+	animation: pop-in 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
 @keyframes pop-in {
 	0% {
@@ -276,4 +276,79 @@ textarea,
 .art-frame,
 .vr-photo {
 	border-radius: 14px;
+}
+
+/* ============================================================
+   PRINT / PORTFOLIO PDF
+   Headless-browser friendly rules so `print-to-pdf` produces a
+   clean multi-page document: colours stay, scroll-reveals are
+   force-shown, sections paginate, nothing splits mid-card.
+   ============================================================ */
+@media print {
+	/* Browsers drop background colours by default — keep the beige,
+	   charcoal panels and orange accents. */
+	*,
+	*::before,
+	*::after {
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+	}
+
+	/* Scroll-reveal elements sit at opacity 0 until scrolled into view;
+	   a print render never scrolls, so force everything visible. */
+	.reveal,
+	.reveal.revealed {
+		opacity: 1 !important;
+		transform: none !important;
+		animation: none !important;
+	}
+
+	/* Drop the sticky nav chrome (it's interactive, not portfolio). */
+	.topbar {
+		display: none !important;
+	}
+
+	/* Retain the sticky-header clearances.
+	   (Layout anchor offsets are irrelevant on paper.) */
+	section[id] {
+		scroll-margin-top: 0;
+	}
+
+	/* One page per portfolio section: hero first, then each section. */
+	section[id] {
+		break-before: page;
+	}
+
+	/* Section headers stay glued to the content that follows them. */
+	.section-head,
+	.head {
+		break-inside: avoid;
+		break-after: avoid;
+	}
+
+	/* Keep panels/cards intact — never split across pages. */
+	.panel,
+	.panel-dk,
+	.card,
+	.tile,
+	.spec,
+	.stat,
+	.step,
+	.voice,
+	.stamp,
+	.hero,
+	.footer,
+	.form,
+	.portrait,
+	.project-tile {
+		break-inside: avoid;
+	}
+
+	html,
+	body {
+		height: auto;
+	}
+	#app {
+		min-height: 0;
+	}
 }

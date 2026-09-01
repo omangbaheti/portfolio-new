@@ -76,6 +76,15 @@
 		padding: 24px;
 		position: relative;
 		overflow: hidden;
+		/* Playful hover pop — springy overshoot via the arcade backOut curve.
+		   (The reveal pop-in uses fill-mode: backwards, so it never pins the
+		   transform and never needs toggling off on hover.) */
+		transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+		will-change: transform;
+	}
+	.pub:hover {
+		transform: scale(1.04) rotate(0.5deg);
+		z-index: 5;
 	}
 	@media (min-width: 820px) {
 		.pub {
@@ -160,6 +169,7 @@
 		border: 1px solid var(--cream);
 		padding: 8px 16px;
 		text-transform: uppercase;
+		border-radius: 14px;
 		transition: background 0.15s, color 0.15s;
 	}
 	.btn-ghosty:hover {
