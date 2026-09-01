@@ -143,7 +143,8 @@
 	}
 
 	/* Stop-motion bob: discrete translateY steps, no easing between frames.
-	   Plays only while the headset is being hovered. */
+	   Runs continuously. Reduced-motion users get it muted by the global
+	   prefers-reduced-motion override in app.css. */
 	@keyframes bob {
 		0% {
 			transform: translateY(0);
@@ -165,9 +166,6 @@
 		}
 	}
 	.bob {
-		animation: none;
-	}
-	.hero-art:hover .bob {
 		animation: bob 2s steps(1, end) infinite;
 	}
 
