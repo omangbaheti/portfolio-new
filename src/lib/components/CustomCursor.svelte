@@ -2,26 +2,32 @@
 	import { onMount, tick } from 'svelte';
 
 	/* ============================================================
-	   CustomCursor — arcade cursor with a fading dot-comet trail.
-	   Halftone-dot comet + burnt-orange point, per DESIGN.MD.
+	   CustomCursor — arcade cursor with a continuous ribbon trail.
+	   A smooth tapered ribbon flows behind the pointer and the
+	   burnt-orange point marks the exact position, per DESIGN.MD.
 	   - Auto-disabled on touch/coarse pointers and reduced motion.
-	   - Trail is charcoal on light surfaces, cream on dark panels;
-	     the cursor dot grows over interactive elements.
+	   - Ribbon is charcoal on light surfaces, cream on dark panels.
 	   ============================================================ */
 
-	const TRAIL_DOTS = 14; // pre-rendered dot elements
+	// Ribbon silhouette (history is sampled once per animation frame)
+	const RIBBON_LEN = 22; // history samples spanned by the visible ribbon
+	const HEAD_WIDTH = 12; // ribbon width at the head (px)
 	const HISTORY_LEN = 64; // sampled trail positions (circular push/shift)
-	const SPREAD = 3; // dot i trails i*SPREAD samples behind the pointer
-	const MAX_DOT = 9; // head dot diameter (px)
-	const MIN_DOT = 3.5; // tail dot diameter (px)
 	const SMOOTH = 22; // exponential cursor lag factor (per second)
 
 	// Elements that should trigger the "interactive" hover growth
 	const INTERACTIVE =
 		'a, button, input, textarea, select, summary, label, [role="button"], [tabindex], .press, .anim-wub';
 
+	// Theme colors (mirror of the :root vars in app.css, read by the canvas)
+	const CHAR = '#1c1b19';
+	const CREAM = '#d9d5c9';
+
 	let rootEl = $state<HTMLDivElement | undefined>();
-	let dotEls: HTMLSpanElement[] = [];
+	let canvasEl = $state<HTMLCanvasElement | undefined>();
+	let ctx: CanvasRenderingContext2D | null = null;
+	let canvasW = 0;
+	let canvasH = 0;
 
 	let active = $state(false); // custom cursor should run
 	let visible = $state(false); // pointer is inside the window & has moved
@@ -46,7 +52,7 @@
 	/* ---------- Surface sampling ---------- */
 
 	// Walk up the ancestor chain until we hit an opaque background; a dark
-	// one flips the cursor/trail to cream so it stays visible on charcoal panels.
+	// one flips the ribbon to cream so it stays visible on charcoal panels.
 	function isDarkUnder(el: Element | null): boolean {
 		let node: Element | null = el;
 		for (let depth = 0; node && depth < 8; depth++) {
@@ -95,6 +101,107 @@
 	const onPointerUp = () => (pressed = false);
 	const onLeave = () => (visible = false);
 
+	function resizeCanvas() {
+		if (!canvasEl) return;
+		const dpr = Math.min(2, window.devicePixelRatio || 1);
+		canvasW = window.innerWidth;
+		canvasH = window.innerHeight;
+		canvasEl.width = Math.round(canvasW * dpr);
+		canvasEl.height = Math.round(canvasH * dpr);
+		canvasEl.style.width = `${canvasW}px`;
+		canvasEl.style.height = `${canvasH}px`;
+		ctx = canvasEl.getContext('2d');
+		ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
+	}
+
+	/* ---------- Ribbon rendering ---------- */
+
+	function withAlpha(hex: string, a: number) {
+		const r = parseInt(hex.slice(1, 3), 16);
+		const g = parseInt(hex.slice(3, 5), 16);
+		const b = parseInt(hex.slice(5, 7), 16);
+		return `rgba(${r},${g},${b},${a})`;
+	}
+
+	function draw(fade: number) {
+		if (!ctx) return;
+		ctx.clearRect(0, 0, canvasW, canvasH);
+		if (fade <= 0 || history.length < 3) return;
+
+		const count = Math.min(history.length, RIBBON_LEN);
+		const pts = history.slice(-count);
+
+		// Light [1,2,1] smoothing on the sample points prevents kinks when the
+		// pointer changes direction quickly.
+		const sx: number[] = [];
+		const sy: number[] = [];
+		for (let i = 0; i < count; i++) {
+			const p = pts[i];
+			if (i === 0) {
+				sx.push((p.x * 2 + pts[1].x) / 3);
+				sy.push((p.y * 2 + pts[1].y) / 3);
+			} else if (i === count - 1) {
+				sx.push((p.x * 2 + pts[count - 2].x) / 3);
+				sy.push((p.y * 2 + pts[count - 2].y) / 3);
+			} else {
+				sx.push((pts[i - 1].x + p.x * 2 + pts[i + 1].x) / 4);
+				sy.push((pts[i - 1].y + p.y * 2 + pts[i + 1].y) / 4);
+			}
+		}
+
+		// Edge normals (perpendicular to the local direction)
+		const nx: number[] = [];
+		const ny: number[] = [];
+		for (let i = 0; i < count; i++) {
+			let dx: number;
+			let dy: number;
+			if (i === 0) {
+				dx = sx[1] - sx[0];
+				dy = sy[1] - sy[0];
+			} else if (i === count - 1) {
+				dx = sx[count - 1] - sx[count - 2];
+				dy = sy[count - 1] - sy[count - 2];
+			} else {
+				dx = sx[i + 1] - sx[i - 1];
+				dy = sy[i + 1] - sy[i - 1];
+			}
+			const len = Math.hypot(dx, dy) || 1;
+			nx.push(-dy / len);
+			ny.push(dx / len);
+		}
+
+		const color = dark ? CREAM : CHAR;
+		// Tapered polygon: width grows toward the head (t = 1)
+		ctx.beginPath();
+		for (let i = 0; i < count; i++) {
+			const t = i / (count - 1);
+			const w = (HEAD_WIDTH * Math.pow(t, 0.75)) / 2;
+			ctx.lineTo(sx[i] + nx[i] * w, sy[i] + ny[i] * w);
+		}
+		for (let i = count - 1; i >= 0; i--) {
+			const t = i / (count - 1);
+			const w = (HEAD_WIDTH * Math.pow(t, 0.75)) / 2;
+			ctx.lineTo(sx[i] - nx[i] * w, sy[i] - ny[i] * w);
+		}
+		ctx.closePath();
+
+		const head = pts[count - 1];
+		const tail = pts[0];
+		const g = ctx.createLinearGradient(head.x, head.y, tail.x, tail.y);
+		g.addColorStop(0, color);
+		g.addColorStop(1, withAlpha(color, 0));
+		ctx.globalAlpha = fade * 0.85;
+		ctx.fillStyle = g;
+		ctx.fill();
+		ctx.globalAlpha = 1;
+
+		// Rounded head cap so the ribbon blends into the orange core dot
+		ctx.beginPath();
+		ctx.arc(head.x, head.y, HEAD_WIDTH / 2, 0, Math.PI * 2);
+		ctx.fillStyle = withAlpha(color, fade * 0.9);
+		ctx.fill();
+	}
+
 	/* ---------- Animation loop ---------- */
 
 	function frame(now: number) {
@@ -121,31 +228,9 @@
 		const idle = now - lastMoveAt;
 		let fade = 1;
 		if (idle > 150) fade = Math.max(0, 1 - (idle - 150) / 320);
-		if (fade === 0 && history.length > 0) {
-			history.length = 0;
-		}
+		if (fade === 0 && history.length > 0) history.length = 0;
 
-		for (let i = 0; i < dotEls.length; i++) {
-			const dot = dotEls[i];
-			const src = history.length - 1 - (i * SPREAD + 1);
-			if (src >= 0 && fade > 0) {
-				const p = history[src];
-				const t = 1 - i / (dotEls.length - 1); // 1 → head, 0 → tail
-				const size = MIN_DOT + (MAX_DOT - MIN_DOT) * Math.pow(t, 1.4);
-				const op = fade * 0.9 * Math.pow(t, 1.8);
-				dot.style.opacity = op.toFixed(3);
-				dot.style.width = `${size.toFixed(1)}px`;
-				dot.style.height = `${size.toFixed(1)}px`;
-				// Dots live inside the root, which is itself translated to the cursor
-				// each frame — offset each dot relative to the cursor or the trail
-				// double-shifts and gradually deserts the pointer.
-				const dx = p.x - cx;
-				const dy = p.y - cy;
-				dot.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) translate(-50%, -50%)`;
-			} else {
-				dot.style.opacity = '0';
-			}
-		}
+		draw(fade);
 	}
 
 	/* ---------- Lifecycle ---------- */
@@ -162,7 +247,7 @@
 			active = on;
 			if (on) {
 				await tick();
-				dotEls = Array.from(rootEl?.querySelectorAll<HTMLSpanElement>('.dot') ?? []);
+				resizeCanvas();
 				if (raf) cancelAnimationFrame(raf);
 				raf = requestAnimationFrame(frame);
 			} else {
@@ -174,6 +259,9 @@
 				hovering = false;
 				pressed = false;
 				visible = false;
+				ctx = null;
+				canvasW = 0;
+				canvasH = 0;
 			}
 		};
 
@@ -182,6 +270,7 @@
 		fine.addEventListener('change', apply);
 		noMotion.addEventListener('change', apply);
 
+		window.addEventListener('resize', resizeCanvas);
 		window.addEventListener('pointermove', onPointerMove, { passive: true });
 		window.addEventListener('pointerdown', onPointerDown, { passive: true });
 		window.addEventListener('pointerup', onPointerUp);
@@ -192,6 +281,7 @@
 			cancelAnimationFrame(raf);
 			fine.removeEventListener('change', apply);
 			noMotion.removeEventListener('change', apply);
+			window.removeEventListener('resize', resizeCanvas);
 			window.removeEventListener('pointermove', onPointerMove);
 			window.removeEventListener('pointerdown', onPointerDown);
 			window.removeEventListener('pointerup', onPointerUp);
@@ -203,23 +293,33 @@
 </script>
 
 {#if active}
+	<canvas class="trail-canvas" class:visible aria-hidden="true" bind:this={canvasEl}></canvas>
 	<div
 		class="cursor-root"
 		class:visible
 		class:hovering
 		class:pressed
-		class:dark
 		bind:this={rootEl}
 		aria-hidden="true"
 	>
-		{#each Array(TRAIL_DOTS) as _, i (i)}
-			<span class="dot"></span>
-		{/each}
 		<span class="core"></span>
 	</div>
 {/if}
 
 <style>
+	/* Full-viewport canvas behind the cursor; the ribbon is drawn in JS */
+	.trail-canvas {
+		position: fixed;
+		inset: 0;
+		z-index: 2147482999; /* just under .cursor-root */
+		pointer-events: none;
+		opacity: 0;
+		transition: opacity 0.15s ease;
+	}
+	.trail-canvas.visible {
+		opacity: 1;
+	}
+
 	.cursor-root {
 		position: fixed;
 		left: 0;
@@ -232,22 +332,6 @@
 	}
 	.cursor-root.visible {
 		opacity: 1;
-	}
-
-	/* Halftone comet dots */
-	.dot {
-		position: absolute;
-		left: 0;
-		top: 0;
-		border-radius: 50%;
-		background: var(--char);
-		opacity: 0;
-		will-change: transform, opacity;
-	}
-
-	/* Flip the trail to cream on dark panels */
-	.cursor-root.dark .dot {
-		background-color: var(--cream);
 	}
 
 	/* Burnt-orange point — marks the exact pointer position */
@@ -274,6 +358,7 @@
 	}
 
 	@media print {
+		.trail-canvas,
 		.cursor-root {
 			display: none;
 		}

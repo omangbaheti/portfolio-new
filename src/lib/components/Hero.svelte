@@ -3,7 +3,7 @@
 	import vrImage from '../../assets/VRHeadset.png?url';
 	import SocialIcon from '$lib/components/SocialIcon.svelte';
 
-	// Split the name into letters for the hover-raise wave
+	// Split the name into letters so each can rise on hover
 	const titleWords = $derived(name.split(' ').map((w) => w.split('')));
 </script>
 
@@ -14,7 +14,7 @@
 			{#each titleWords as word, wi (wi)}
 				{#if wi > 0}{' '}{/if}
 				{#each word as ch, ci (`${wi}-${ci}`)}
-					<span class="ltr" style="--d:{ci * 24}ms">{ch}</span>
+					<span class="ltr">{ch}</span>
 				{/each}
 			{/each}
 		</span>
@@ -88,24 +88,13 @@
 		font-size: clamp(2.6rem, 9vw, 6rem);
 		line-height: 0.9;
 	}
-	/* Per-letter hover raise — bigger, slower wave than the header brand,
-	   scaled for display type */
+	/* Hovered letter rises up and settles back down */
 	.ltr {
 		display: inline-block;
-		transition:
-			transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-			color 0.15s ease;
-		transition-delay: var(--d, 0ms);
+		transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 	}
-	.page-title:hover .ltr {
-		transform: translateY(-0.09em);
-		color: var(--orange);
-		transition-delay: calc(var(--d, 0ms) / 2);
-	}
-	.page-title .ltr:hover {
-		transform: translateY(-0.14em) rotate(-3deg);
-		color: var(--orange);
-		transition-delay: 0ms;
+	.ltr:hover {
+		transform: translateY(-0.14em);
 	}
 	.page-sub {
 		color: var(--orange);
@@ -125,7 +114,7 @@
 		position: relative;
 		overflow: hidden;
 		/* One shared motion cycle keeps the headset bob and button breathe in sync */
-		--cycle: 2.4s;
+		--cycle: 3s;
 	}
 	@media (min-width: 768px) {
 		.hero {

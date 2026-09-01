@@ -244,24 +244,16 @@
 		color: var(--char);
 		line-height: 1.05;
 	}
-	/* Per-letter hover raise — springy hop with a slight cascade between
-	   neighbouring letters via transition-delay */
+	/* Per-letter hover — the single letter under the cursor jumps up 45px */
 	.ltr {
 		display: inline-block;
 		transition:
 			transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
 			color 0.15s ease;
-		transition-delay: var(--d, 0ms);
-	}
-	.brand:hover .ltr {
-		transform: translateY(-4px);
-		color: var(--orange);
-		transition-delay: calc(var(--d, 0ms) / 2);
 	}
 	.brand .ltr:hover {
-		transform: translateY(-6px) rotate(-3deg);
+		transform: translateY(-45px);
 		color: var(--orange);
-		transition-delay: 0ms;
 	}
 
 	.desktop {
