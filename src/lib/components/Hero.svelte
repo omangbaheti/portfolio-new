@@ -19,7 +19,7 @@
 			{/each}
 		</span>
 	</h1>
-	<span class="eyebrow page-sub">Software Developer | XR Engineer | UX Researcher</span>
+	<span class="eyebrow page-sub">VR/AR Developer | HCI/UX Researcher | Game Developer | Software Engineer</span>
 </div>
 
 <!-- Large hero panel -->
@@ -46,7 +46,7 @@
 				<a href="#contact" class="btn-contact display press">Contact Me</a>
 
 				<div class="social-inline">
-					<SocialIcon name="email" href="mailto:omang@baheti.dev" label="Email" size={32} lift />
+					<SocialIcon name="email" href="mailto:contact@omang.ca" label="Email" size={32} lift />
 					<SocialIcon
 						name="scholar"
 						href="https://scholar.google.com"

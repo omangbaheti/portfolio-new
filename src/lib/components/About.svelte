@@ -2,24 +2,26 @@
 	import { reveal } from '$lib/reveal';
 
 	const stats = [
-		{ n: '8+', label: 'Years XR' },
-		{ n: '200+', label: 'Participants' },
-		{ n: '22', label: 'Shipped' },
-		{ n: '3', label: 'GDC Talks' }
+		{ n: '3+', label: 'Years XR' },
+		{ n: '90+', label: 'Participants' },
+		{ n: '6', label: 'Papers Authored' },
+		{ n: '150+', label: 'Students Taught' }
 	];
 
 	const skillGroups = [
-		{ label: 'XR DEV', items: ['Unreal Engine 5', 'Unity 6', 'OpenXR / WebXR', 'HLSL / Shader Graph', 'Rollback Netcode'] },
-		{ label: 'UX RESEARCH', items: ['User Interviews', 'Usability Testing', 'Think-Aloud', 'Eye Tracking', 'Diary Studies'] },
-		{ label: 'ANALYSIS', items: ['Thematic Coding', 'Affinity Mapping', 'Journey Mapping', 'Statistical Analysis', 'Heuristic Eval'] },
-		{ label: 'TOOLS', items: ['Figma / FigJam', 'Dovetail', 'C++ / C# / Python', 'SPSS / R', 'Miro'] }
+		{ label: 'LANGUAGES', items: ['C#', 'C / C++', 'Python', 'TypeScript', 'JavaScript', 'Rust', 'Go', 'GLSL / HLSL', 'R', 'Nix'] },
+		{ label: 'XR / GAME ENGINES', items: ['Unity', 'Unreal', 'Godot', 'XR Interaction Toolkit', 'WebXR', 'Meta XR SDK', 'AR Foundation', 'Photon Fusion', 'Three.js', 'ROS2'] },
+		{ label: 'RESEARCH METHODS', items: ['Usability Testing', 'Quantitative User Studies', 'Qualitative Analysis', 'Survey Design', 'Behavioral Data Analysis', 'Statistical Analysis (SPSS / R)'] },
+		{ label: 'AI / DATA', items: ['PyTorch', 'TensorFlow / Keras', 'Pandas / NumPy', 'Computer Vision', 'LLMs', 'LangChain'] },
+		{ label: 'WEB / MOBILE', items: ['Node.js', 'React', 'React Native', 'Next.js', 'Flutter', 'HTML / CSS'] },
+		{ label: 'CLOUD / INFRA', items: ['AWS / GCP', 'Firebase / Supabase', 'MySQL / PostgreSQL', 'MongoDB / Redis', 'Docker / Kubernetes', 'Linux / NixOS', 'Git', 'Figma'] }
 	];
 
 	let {
-		portrait = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=700&h=900&fit=crop&auto=format',
-		location = 'AMSTERDAM, NL',
-		year = '2024',
-		setup = 'PLAYER 1 — KAI'
+		portrait = '/img/author.png',
+		location = 'TORONTO, ON',
+		year = '2026',
+		setup = 'PLAYER 1 — OMANG'
 	} = $props();
 </script>
 
@@ -46,16 +48,22 @@
 
 			<div class="bio">
 				<p>
-					I'm Omang Baheti — XR developer and UX researcher, eight years building and studying
-					immersive technology from both sides of the monitor.
+					I'm Omang Baheti — an XR engineer with 3+ years building immersive systems in
+					<span class="hi">Unity, Unreal, and Godot</span>, and 2+ years in HCI and UX research.
+					I bring production engineering discipline and research rigour to spatial computing
+					problems that haven't been solved yet.
 				</p>
 				<p>
-					Research gives engineering decisions an empirical anchor. Engineering makes research
+					Research gives engineering decisions an empirical anchor; engineering makes research
 					actionable — a usability finding can become a pull request the same day.
 				</p>
 				<p>
-					Previously at <span class="hi">Niantic Labs</span>, <span class="hi">Ready at Dawn</span>,
-					and <span class="hi">Microsoft Research</span>. Now independent.
+					At the <span class="hi">OVI Lab (UBC)</span> I built research systems from scratch and ran
+					studies with <span class="hi">90+ participants</span>, authoring papers accepted at
+					<span class="hi">ISMAR</span>, <span class="hi">MobileHCI</span>, and
+					<span class="hi">GI</span>. I co-designed an open-source game development course reaching
+					150+ students, and earned my MSc in CS (HCI/XR). Now building from
+					<span class="hi">Toronto</span>.
 				</p>
 			</div>
 

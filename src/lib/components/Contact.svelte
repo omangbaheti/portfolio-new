@@ -12,10 +12,9 @@
 	];
 
 	const rows = [
-		{ label: 'EMAIL', value: 'omang@baheti.dev' },
-		{ label: 'LOCATION', value: 'Amsterdam / Remote' },
-		{ label: 'DEV SLOT', value: 'Q1 2025 — Open' },
-		{ label: 'RESEARCH', value: 'Q1 2025 — Limited' },
+		{ label: 'EMAIL', value: 'contact@omang.ca' },
+		{ label: 'LOCATION', value: 'Toronto, ON / Remote' },
+		{ label: 'STATUS', value: 'Open to new roles' },
 		{ label: 'RESPONSE', value: '< 24 hours' }
 	];
 

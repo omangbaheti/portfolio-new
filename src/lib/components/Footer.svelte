@@ -7,10 +7,20 @@
 		<!-- Social icons -->
 		<div class="footer-actions">
 			<div class="social-inline">
-				<SocialIcon name="email" href="mailto:omang@baheti.dev" label="Email" />
-				<SocialIcon name="scholar" href="https://scholar.google.com" label="Scholar" external />
-				<SocialIcon name="linkedin" href="https://www.linkedin.com" label="LinkedIn" external />
-				<SocialIcon name="github" href="https://github.com" label="GitHub" external />
+				<SocialIcon name="email" href="mailto:contact@omang.ca" label="Email" />
+				<SocialIcon
+					name="scholar"
+					href="https://scholar.google.ca/citations?user=Qhk3nBcAAAAJ&hl=en&oi=ao"
+					label="Scholar"
+					external
+				/>
+				<SocialIcon
+					name="linkedin"
+					href="https://www.linkedin.com/in/omang-baheti/"
+					label="LinkedIn"
+					external
+				/>
+				<SocialIcon name="github" href="https://github.com/omangbaheti" label="GitHub" external />
 			</div>
 		</div>
 	</div>
