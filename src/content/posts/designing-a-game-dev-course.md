@@ -98,7 +98,7 @@ Instead of providing a structured tutorial, students were required to synthesize
 Additional bonus marks were offered for implementing more advanced mechanics such as double-jumping and dashing, encouraging experimentation and deeper engagement with movement systems.
 You can find the assignment brief [here](https://raw.githubusercontent.com/UBCO-COSC-416/.github/main/profile/Assets/ThirdPersonPlatformer.pdf).
 
-![Third person platformer](/img/posts/game-dev-course/featured.png)
+![Third person platformer](https://iili.io/frb3iWF.png)
 
 ### Design 4: Designing Good HUDs — Game Design · Weeks 7–8
 
