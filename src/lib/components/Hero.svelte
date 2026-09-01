@@ -19,7 +19,7 @@
 			{/each}
 		</span>
 	</h1>
-	<span class="eyebrow page-sub">VR/AR Developer | HCI/UX Researcher | Game Developer | Software Engineer</span>
+	<span class="eyebrow page-sub">Software Developer | XR Engineer | UX Researcher</span>
 </div>
 
 <!-- Large hero panel -->
